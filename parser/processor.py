@@ -11,8 +11,6 @@ class LogicalBlockType(enum.Enum):
     LINE = 'LINE'
     ARC = 'ARC'
     POLYGON = 'POLYGON'
-    CIRCLE = 'CIRCLE'
-    HOME = 'HOME'
     SET_POSITION = 'SET_POSITION'
 
 
@@ -26,6 +24,33 @@ class LogicalBlock:
     def __init__(self, block_type: LogicalBlockType = None, commands: [ParsedCommand] = None):
         self.block_type = block_type
         self.commands = commands if commands is not None else []
+
+    def __str__(self):
+        return f'{self.block_type} [{len(self.commands)}]'
+
+    def print_commands(self) -> str:
+        """
+            Print commands in block
+        """
+        return f'{self.block_type}\n [{"\n".join([command.__str__() for command in self.commands])}]:'
+
+    def finalize(self):
+        """
+            Finalize block by setting block type
+        """
+        mnemonics = [command.mnemonic for command in self.commands]
+
+        if ParsedMnemonic.PD in mnemonics:
+            self.block_type = LogicalBlockType.LINE
+            return
+        if ParsedMnemonic.CI in mnemonics:
+            self.block_type = LogicalBlockType.ARC
+            return
+        if ParsedMnemonic.PM in mnemonics:
+            self.block_type = LogicalBlockType.POLYGON
+            return
+
+        self.block_type = LogicalBlockType.SET_POSITION
 
 
 class Processor:
@@ -72,6 +97,9 @@ class Processor:
         current_block = LogicalBlock()
         for command in self.commands:
             if self._is_start_new_block(command):
+                current_block.finalize()
                 self.blocks.append(current_block)
                 current_block = LogicalBlock()
             current_block.commands.append(command)
+        current_block.finalize()
+        self.blocks.append(current_block)
