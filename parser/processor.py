@@ -1,17 +1,8 @@
-import enum
 from typing import Optional
 
-from parser.parsedcommand import ParsedCommand, ParsedMnemonic
-
-
-class LogicalBlockType(enum.Enum):
-    """
-        supported logical block types
-    """
-    LINE = 'LINE'
-    ARC = 'ARC'
-    POLYGON = 'POLYGON'
-    SET_POSITION = 'SET_POSITION'
+from parser.enums import LogicalBlockType, ParsedMnemonic
+from parser.parsedcommand import ParsedCommand
+from parser.utils import Point
 
 
 class LogicalBlock:
@@ -20,10 +11,21 @@ class LogicalBlock:
     """
     block_type: Optional[LogicalBlockType]
     commands: Optional[list[ParsedCommand]]
+    last_position: Point
 
-    def __init__(self, block_type: LogicalBlockType = None, commands: [ParsedCommand] = None):
-        self.block_type = block_type
-        self.commands = commands if commands is not None else []
+    def __init__(self):
+        self.block_type = None
+        self.commands = []
+        self.last_position = Point(0, 0)
+
+    def add_command(self, command: ParsedCommand):
+        """
+            Add command to block
+        """
+        self.commands.append(command)
+        if command.mnemonic == ParsedMnemonic.PA:
+            # TODO: remove index access
+            self.last_position = Point(int(command.arguments[0]), int(command.arguments[1]))
 
     def __str__(self):
         return f'{self.block_type} [{len(self.commands)}]'
@@ -43,6 +45,7 @@ class LogicalBlock:
 
         for command in self.commands:
             if command.mnemonic == ParsedMnemonic.PA:
+                # TODO: remove index access
                 size_x = max(size_x, int(command.arguments[0]))
                 size_y = max(size_y, int(command.arguments[1]))
             # TODO: circle size?
@@ -117,6 +120,6 @@ class Processor:
                 current_block.finalize()
                 self.blocks.append(current_block)
                 current_block = LogicalBlock()
-            current_block.commands.append(command)
+            current_block.add_command(command)
         current_block.finalize()
         self.blocks.append(current_block)

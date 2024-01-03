@@ -1,6 +1,7 @@
 import re
 
-from parser.parsedcommand import ParsedCommand, ParsedMnemonic
+from parser.parsedcommand import ParsedCommand
+from parser.enums import ParsedMnemonic
 
 import logging
 
@@ -15,6 +16,17 @@ class Parser:
     def __init__(self, filename: str):
         self.filename = filename
         self.commands = []
+
+    @staticmethod
+    def _is_command_valid(command: ParsedCommand) -> bool:
+        """
+            check if arguments are valid for given mnemonic
+        """
+        match command.mnemonic:
+            case ParsedMnemonic.PA:
+                return len(command.arguments) == 2
+            case _:
+                return True
 
     @classmethod
     def _parse_command_line(cls, line: str) -> ParsedCommand | None:
@@ -31,6 +43,9 @@ class Parser:
             logging.warning(f'Failed to parse command: {line}\n ({e})')
             return None
         arguments = parsed.group('arguments').split(',') if parsed.group('arguments') else []
+        if not cls._is_command_valid(ParsedCommand(mnemonic, arguments)):
+            logging.warning(f'Invalid command: {line}')
+            return None
         return ParsedCommand(mnemonic, arguments)
 
     def parse(self):
