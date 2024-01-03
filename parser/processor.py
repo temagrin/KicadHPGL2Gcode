@@ -91,15 +91,15 @@ class Processor:
         """
         match command.mnemonic:
             case ParsedMnemonic.PU:
-                return False
-            case ParsedMnemonic.PD:
                 return True
+            case ParsedMnemonic.PD:
+                return False
             case ParsedMnemonic.PA:
                 return False
             case ParsedMnemonic.CI:
                 return True
             case ParsedMnemonic.EP:
-                return True
+                return False
             case ParsedMnemonic.FP:
                 return False
             case ParsedMnemonic.PM:
@@ -107,7 +107,7 @@ class Processor:
                     case '0':  # start new polygon
                         return True
                     case '2':  # close current polygon
-                        return True
+                        return False
                     case _:
                         return False
             case _:
