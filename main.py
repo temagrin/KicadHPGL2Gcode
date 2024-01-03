@@ -1,4 +1,10 @@
 import logging
+from decimal import Decimal
+
+from parser.parser import Parser
+from parser.processor import Processor
+from parser.render import ImageRenderer
+
 
 # Посмотреть что там кикад вообще генерировать может
 # https://gitlab.com/kicad/code/kicad/-/blob/master/common/plotters/HPGL_plotter.cpp
@@ -76,7 +82,22 @@ class HPGL2:
 # 3.39 plu = 1 dot @ 300 dp
 
 if __name__ == '__main__':
-    hpgl = HPGL2("laser-B_Cu.plt")
-    hpgl.parse_file()
-    for c in hpgl.new_commands:
-        logging.critical(f'Unexpected command: "{c}"')
+    # hpgl = HPGL2("laser-B_Cu.plt")
+    # hpgl.parse_file()
+    # for c in hpgl.new_commands:
+    #     logging.critical(f'Unexpected command: "{c}"')
+
+    logging.basicConfig(level=logging.WARNING)
+    parser = Parser("laser-B_Cu.plt")
+    # parser = Parser("laser-Edge_Cuts.plt")
+    parser.parse()
+
+    processor = Processor(parser.commands)
+    processor.process()
+    # for block in processor.blocks:
+    #     print(block.print_commands())
+
+    ImageRenderer(
+        blocks=processor.blocks,
+        scaling_factor=Decimal(0.5)
+    ).render()
