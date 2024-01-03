@@ -34,6 +34,23 @@ class LogicalBlock:
         """
         return f'{self.block_type}\n [{"\n".join([command.__str__() for command in self.commands])}]:'
 
+    def calc_size(self) -> (int, int):
+        """
+            Calculate size of block
+        """
+        size_x = 0
+        size_y = 0
+
+        for command in self.commands:
+            if command.mnemonic == ParsedMnemonic.PA:
+                size_x = max(size_x, int(command.arguments[0]))
+                size_y = max(size_y, int(command.arguments[1]))
+            # TODO: circle size?
+
+            # TODO: relative move?
+
+        return size_x, size_y
+
     def finalize(self):
         """
             Finalize block by setting block type
