@@ -1,6 +1,8 @@
 import logging
 from decimal import Decimal
 
+from PIL import Image
+
 from parser.parser import Parser
 from parser.processor import Processor
 from parser.render import ImageRenderer
@@ -97,7 +99,12 @@ if __name__ == '__main__':
     # for block in processor.blocks:
     #     print(block.print_commands())
 
-    ImageRenderer(
+    image = ImageRenderer(
         blocks=processor.blocks,
         scaling_factor=Decimal(0.5)
     ).render()
+
+    image = image.rotate(180)
+    image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+    image.show()

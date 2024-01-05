@@ -89,7 +89,11 @@ class ImageRenderer:
             case _:
                 raise ValueError(f'Unknown block type: {block.block_type}')
 
-    def render(self):
+    def render(self) -> Image:
+        """
+        Render image from blocks
+        :return: PIL Image
+        """
         size = self._get_image_size()
 
         image = Image.new('RGB', (size.x, size.y), color='white')
@@ -99,7 +103,4 @@ class ImageRenderer:
             self._render_block(block, draw, last_position)
             last_position = block.last_position
 
-        image = image.rotate(180)
-        image = image.transpose(Image.FLIP_LEFT_RIGHT)
-
-        image.show()
+        return image
