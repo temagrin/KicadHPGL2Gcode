@@ -27,6 +27,12 @@ class LogicalBlock:
             # TODO: remove index access
             self.last_position = Point(int(command.arguments[0]), int(command.arguments[1]))
 
+    def is_not_empty(self) -> bool:
+        """
+            Check if block is not empty
+        """
+        return len(self.commands) > 0
+
     def __str__(self):
         return f'{self.block_type} [{len(self.commands)}]'
 
@@ -43,16 +49,19 @@ class LogicalBlock:
         size_x = 0
         size_y = 0
 
+        max_radius = 0
+
         for command in self.commands:
             if command.mnemonic == ParsedMnemonic.PA:
                 # TODO: remove index access
                 size_x = max(size_x, int(command.arguments[0]))
                 size_y = max(size_y, int(command.arguments[1]))
-            # TODO: circle size?
+            if command.mnemonic == ParsedMnemonic.CI:
+                max_radius = max(max_radius, int(command.arguments[0]))
 
             # TODO: relative move?
 
-        return size_x, size_y
+        return size_x + max_radius, size_y+max_radius
 
     def finalize(self):
         """
@@ -60,14 +69,18 @@ class LogicalBlock:
         """
         mnemonics = [command.mnemonic for command in self.commands]
 
+        # warning: order matters!
+
         if ParsedMnemonic.PD in mnemonics:
             self.block_type = LogicalBlockType.LINE
             return
-        if ParsedMnemonic.CI in mnemonics:
-            self.block_type = LogicalBlockType.ARC
-            return
+
         if ParsedMnemonic.PM in mnemonics:
             self.block_type = LogicalBlockType.POLYGON
+            return
+
+        if ParsedMnemonic.CI in mnemonics:
+            self.block_type = LogicalBlockType.ARC
             return
 
         self.block_type = LogicalBlockType.SET_POSITION
@@ -84,6 +97,13 @@ class Processor:
         self.commands = commands
         self.blocks = []
 
+    def append_block(self, block: LogicalBlock):
+        """
+            Append block to list of blocks
+        """
+        if block.is_not_empty():
+            self.blocks.append(block)
+
     @staticmethod
     def _is_start_new_block(command) -> bool:
         """
@@ -97,7 +117,7 @@ class Processor:
             case ParsedMnemonic.PA:
                 return False
             case ParsedMnemonic.CI:
-                return True
+                return False
             case ParsedMnemonic.EP:
                 return False
             case ParsedMnemonic.FP:
@@ -118,8 +138,10 @@ class Processor:
         for command in self.commands:
             if self._is_start_new_block(command):
                 current_block.finalize()
-                self.blocks.append(current_block)
+                self.append_block(current_block)
                 current_block = LogicalBlock()
+
             current_block.add_command(command)
+
         current_block.finalize()
-        self.blocks.append(current_block)
+        self.append_block(current_block)
