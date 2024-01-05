@@ -10,7 +10,7 @@ class Parser:
     """
         Parses kicad-produced file into commands
     """
-    parse_regex = r'(?P<mnemonic>\w{2}){1}\s?(?P<arguments>[\d,]+)?'
+    parse_regex = re.compile(r'\s*(?P<mnemonic>\w{2}){1}\s?(?P<arguments>[\d,]+)?')
     commands: [ParsedCommand]
 
     def __init__(self, filename: str):
@@ -36,6 +36,7 @@ class Parser:
         """
         parsed = re.match(cls.parse_regex, line)
         if parsed is None:
+            logging.warning(f'Failed to parse command: {line}\n (regex failed)')
             return None
         try:
             mnemonic = ParsedMnemonic(parsed.group('mnemonic'))
