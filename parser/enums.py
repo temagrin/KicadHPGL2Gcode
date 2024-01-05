@@ -19,7 +19,7 @@ class ParsedMnemonic(enum.Enum):
     PA = 'PA'  # pen absolute
     PD = 'PD'  # pen down
     PM = 'PM'  # polygon mode
-    EP = 'EP'  # end polygon
+    EP = 'EP'  # edge polygon
     FP = 'FP'  # fill polygon
     CI = 'CI'  # circle
 
