@@ -34,6 +34,8 @@ class Parser:
             parse line into mnemonic and arguments
             returns None if line is not a valid command
         """
+        if not line:
+            return None
         parsed = re.match(cls.parse_regex, line)
         if parsed is None:
             logging.warning(f'Failed to parse command: {line}\n (regex failed)')
@@ -55,7 +57,7 @@ class Parser:
                 for chunk in line.split(';'):
                     if not chunk:
                         continue
-                    command = self._parse_command_line(chunk)
+                    command = self._parse_command_line(chunk.strip())
                     if command is not None:
                         self.commands.append(command)
                         logging.info(f'Parsed command: {command}')
