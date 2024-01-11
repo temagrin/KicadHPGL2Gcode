@@ -1,3 +1,8 @@
+Оригинальное фирмваре тут https://github.com/grblHAL/STM32F4xx
+
+Мод заключается в выводе сигнала PPI лазера на отдельный пин, так как родной плагин использует для пульса - пин включения шпинделя и по нему же определяет статус что некоректно.
+
+
 # STM32F4xx grblHAL driver
 
 A grblHAL driver for the STM32F401xC, STM32F407xx, STM32F411xE and STM32F446xx ARM processors.
